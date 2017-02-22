@@ -57,14 +57,14 @@ func NewSqsInfo(queue string) (s *SqsInfo, err error) {
 	}
 	s.qurl = *resp.QueueUrl
 
-	s.Get()
+	s.Refresh()
 	err = s.LastError()
 
 	return
 }
 
-// Get ...
-func (s *SqsInfo) Get() {
+// Refresh ...
+func (s *SqsInfo) Refresh() {
 	params := &sqs.GetQueueAttributesInput{
 		QueueUrl: aws.String(s.qurl), // Required
 		AttributeNames: []*string{
