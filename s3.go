@@ -28,8 +28,15 @@ func S3PresignV4(bucketName, filePath, bucketRegion string, expireFromNow time.D
 		bucketRegion = *AWSSession.Config.Region
 	}
 
-	url := fmt.Sprintf("https://%s.%s.amazonaws.com/%s%s",
-		"s3", bucketRegion, bucketName, filePath)
+	var url string
+	if bucketRegion == "us-east-1" {
+		// Legacy - omit region from URL
+		url = fmt.Sprintf("https://%s.amazonaws.com/%s%s",
+			"s3", bucketName, filePath)
+	} else {
+		url = fmt.Sprintf("https://%s.%s.amazonaws.com/%s%s",
+			"s3", bucketRegion, bucketName, filePath)
+	}
 
 	req, _ := http.NewRequest("GET", url, nil)
 
