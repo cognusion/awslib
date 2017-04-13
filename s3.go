@@ -4,14 +4,46 @@ import (
 	"crypto/md5"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/signer/v4"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
+
+// S3PresignV4 "presigns" an S3 GET URL
+func S3PresignV4(bucketName, filePath, bucketRegion string, expireFromNow time.Duration, creds *credentials.Credentials) (signedUrl string, err error) {
+
+	if creds == nil {
+		creds = AWSSession.Config.Credentials
+	}
+
+	if bucketRegion == "" {
+		bucketRegion = *AWSSession.Config.Region
+	}
+
+	url := fmt.Sprintf("https://%s.%s.amazonaws.com/%s%s",
+		"s3", bucketRegion, bucketName, filePath)
+
+	req, _ := http.NewRequest("GET", url, nil)
+
+	sign := v4.NewSigner(creds)
+	sign.DisableURIPathEscaping = true
+	sign.DisableRequestBodyOverwrite = true
+
+	_, err = sign.Presign(req, nil, "s3", bucketRegion, expireFromNow, time.Now())
+	if err == nil {
+		signedUrl = req.URL.String()
+	}
+
+	return
+}
 
 // S3urlToParts explodes an s3://bucket/path/file url into its parts
 func S3urlToParts(url string) (bucket, filePath, filename string) {
