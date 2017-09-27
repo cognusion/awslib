@@ -4,6 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/elasticbeanstalk"
 )
 
 // Ec2Info is a helper structure ...
@@ -15,7 +16,21 @@ type Ec2Info struct {
 	Az    string
 }
 
-// NewEc2Info returns an Ec2Info struct from an instance ID
+//EbInfo is a helper structure...
+type EbInfo struct {
+	State    string
+	Color    string
+	Degraded int64
+	Info     int64
+	NoData   int64
+	Ok       int64
+	Pending  int64
+	Severe   int64
+	Unknown  int64
+	Warning  int64
+}
+
+// NewEc2Info returns an Ec2Info struct or an error from an instance ID
 // Assumes InitAWS has been called.
 func NewEc2Info(instance string) (iInfo *Ec2Info, err error) {
 
@@ -65,5 +80,37 @@ func ELB_HostCounts(instance string) (healthyPoint, unhealthyPoint *cloudwatch.D
 
 	healthyPoint = lastMetric(Hresp)
 	unhealthyPoint = lastMetric(Uresp)
+	return
+}
+
+// NewEbInfo returns an EbInfo struct or an error for the specified EB environment
+// Assumes InitAWS has been called.
+func NewEbInfo(ebenv string) (ebInfo *EbInfo, err error) {
+	svc := elasticbeanstalk.New(AWSSession)
+	input := &elasticbeanstalk.DescribeEnvironmentHealthInput{
+		AttributeNames: []*string{
+			aws.String("All"),
+		},
+		EnvironmentName: aws.String(ebenv),
+	}
+
+	result, err := svc.DescribeEnvironmentHealth(input)
+	if err != nil {
+		return nil, err
+	}
+
+	ebInfo = &EbInfo{
+		State:    *result.HealthStatus,
+		Color:    *result.Color,
+		Degraded: *result.InstancesHealth.Degraded,
+		Info:     *result.InstancesHealth.Info,
+		NoData:   *result.InstancesHealth.NoData,
+		Ok:       *result.InstancesHealth.Ok,
+		Pending:  *result.InstancesHealth.Pending,
+		Severe:   *result.InstancesHealth.Severe,
+		Unknown:  *result.InstancesHealth.Unknown,
+		Warning:  *result.InstancesHealth.Warning,
+	}
+
 	return
 }
