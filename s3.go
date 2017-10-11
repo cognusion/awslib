@@ -96,6 +96,27 @@ func BucketToFile(bucket, bucketPath, filename string) (size int64, err error) {
 	return
 }
 
+// BucketToFileVersion copies a version of a file from an S3 bucket to a local file
+func BucketToFileVersion(bucket, bucketPath, filename, version string) (size int64, err error) {
+
+	// Open the file
+	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0777)
+	if err != nil {
+		return
+	}
+	defer file.Close()
+
+	downloader := s3manager.NewDownloader(nil)
+	size, err = downloader.Download(file,
+		&s3.GetObjectInput{
+			Bucket:    aws.String(bucket),
+			Key:       aws.String(bucketPath),
+			VersionId: aws.String(version),
+		})
+
+	return
+}
+
 // FileToBucket copies a "local" file to an S3 bucket
 func FileToBucket(filename, bucket string) (size int64, err error) {
 
