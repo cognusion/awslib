@@ -86,7 +86,7 @@ func BucketToFile(bucket, bucketPath, filename string) (size int64, err error) {
 	}
 	defer file.Close()
 
-	downloader := s3manager.NewDownloader(nil)
+	downloader := s3manager.NewDownloader(AWSSession)
 	size, err = downloader.Download(file,
 		&s3.GetObjectInput{
 			Bucket: aws.String(bucket),
@@ -106,7 +106,7 @@ func BucketToFileVersion(bucket, bucketPath, filename, version string) (size int
 	}
 	defer file.Close()
 
-	downloader := s3manager.NewDownloader(nil)
+	downloader := s3manager.NewDownloader(AWSSession)
 	size, err = downloader.Download(file,
 		&s3.GetObjectInput{
 			Bucket:    aws.String(bucket),
@@ -137,7 +137,7 @@ func FileToBucket(filename, bucket string) (size int64, err error) {
 	baseFilename := filepath.Base(filename)
 
 	// Setup the uploader, and git'r'done
-	svc := s3manager.NewUploader(nil)
+	svc := s3manager.NewUploader(AWSSession)
 	_, err = svc.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(baseFilename),
