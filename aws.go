@@ -29,7 +29,10 @@ func InitAWS(awsRegion, awsAccessKey, awsSecretKey string) {
 	if awsRegion != "" {
 		// CLI trumps
 		AWSSession.Config.Region = aws.String(awsRegion)
-	} else if os.Getenv("AWS_DEFAULT_REGION") == "" {
+	} else if os.Getenv("AWS_DEFAULT_REGION") != "" {
+		// Env is good, too
+		AWSSession.Config.Region = aws.String(os.Getenv("AWS_DEFAULT_REGION"))
+	} else {
 		// Grab it from this EC2 instance, maybe
 		region, err := getAwsRegionE()
 		if err != nil {
