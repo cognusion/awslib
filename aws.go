@@ -115,6 +115,16 @@ func lastMetric(metrics *cloudwatch.GetMetricStatisticsOutput) (point *cloudwatc
 	return
 }
 
+func GetLastCloudWatchValue(dimensionName, dimensionValue, namespace, metric, stat, unit string) (point *cloudwatch.Datapoint, err error) {
+	var resp *cloudwatch.GetMetricStatisticsOutput
+	resp, err = getMetrics(dimensionName, dimensionValue, namespace, metric, stat, unit)
+	if err != nil {
+		return
+	}
+	point = lastMetric(resp)
+	return
+}
+
 // getMetrics ...
 func getMetrics(dimensionName, dimensionValue, namespace, metric, stat, unit string) (resp *cloudwatch.GetMetricStatisticsOutput, err error) {
 	svc := cloudwatch.New(AWSSession)
