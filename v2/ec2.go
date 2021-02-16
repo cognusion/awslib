@@ -2,6 +2,7 @@ package aws
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/elasticbeanstalk"
 )
 
@@ -30,8 +31,8 @@ type EbInfo struct {
 }
 
 // NewEbInfo returns an EbInfo struct or an error for the specified EB environment
-func NewEbInfo(ebenv string, session *Session) (ebInfo *EbInfo, err error) {
-	svc := elasticbeanstalk.New(session.AWS)
+func NewEbInfo(ebenv string, session *session.Session) (ebInfo *EbInfo, err error) {
+	svc := elasticbeanstalk.New(session)
 	input := &elasticbeanstalk.DescribeEnvironmentHealthInput{
 		AttributeNames: []*string{
 			aws.String("All"),
