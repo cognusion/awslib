@@ -20,6 +20,7 @@ type Ec2Info struct {
 type EbInfo struct {
 	State    string
 	Color    string
+	Causes   []*string
 	Degraded int64
 	Info     int64
 	NoData   int64
@@ -102,6 +103,7 @@ func NewEbInfo(ebenv string) (ebInfo *EbInfo, err error) {
 	ebInfo = &EbInfo{
 		State:    *result.HealthStatus,
 		Color:    *result.Color,
+		Causes:   result.Causes,
 		Degraded: *result.InstancesHealth.Degraded,
 		Info:     *result.InstancesHealth.Info,
 		NoData:   *result.InstancesHealth.NoData,
